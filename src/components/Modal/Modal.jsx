@@ -5,11 +5,11 @@ import PropTypes from 'prop-types';
 const Modal = ({ visibleData, onCloseModal }) => {
   const [dataType, setDataType] = useState('emails');
   console.log('visibleData: ', visibleData);
-  const handleKeyDown = event => {
-    if (event.code === 'Escape') {
-      onCloseModal(event);
-    }
-  };
+  // const handleKeyDown = event => {
+  //   if (event.code === 'Escape') {
+  //     onCloseModal(event);
+  //   }
+  // };
 
   const handleOverlayClick = event => {
     if (event.currentTarget === event.target) {
