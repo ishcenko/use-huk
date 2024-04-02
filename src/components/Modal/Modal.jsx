@@ -1,21 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyledModal, StyledOverlay } from './styled';
 import PropTypes from 'prop-types';
 
 const Modal = ({ visibleData, onCloseModal }) => {
   const [dataType, setDataType] = useState('emails');
-  console.log('visibleData: ', visibleData);
-  // const handleKeyDown = event => {
-  //   if (event.code === 'Escape') {
-  //     onCloseModal(event);
-  //   }
-  // };
+  // console.log('visibleData: ', visibleData);
 
   const handleOverlayClick = event => {
     if (event.currentTarget === event.target) {
       onCloseModal(event);
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = event => {
+      if (event.code === 'Escape') {
+        onCloseModal(event);
+      }
+    };
+    console.log('Modal has Mounter');
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onCloseModal]);
+
+  useEffect(() => {
+    console.log(dataType);
+  }, [dataType]);
 
   const onSetDataType = newDataType => {
     setDataType(newDataType);
@@ -38,18 +50,25 @@ const Modal = ({ visibleData, onCloseModal }) => {
         <br />
         <div className="buttonType">
           <button
-            className={`button-type ${dataType === 'emails' ? 'active' : ' '}`}
+            className={`button-type ${dataType === 'emails' ? 'active' : ''}`}
             onClick={() => onSetDataType('emails')}
             type="button"
           >
             Emails
           </button>
           <button
-            className={`button-type ${dataType === 'users' ? 'active' : ' '}`}
+            className={`button-type ${dataType === 'users' ? 'active' : ''}`}
             onClick={() => onSetDataType('users')}
             type="button"
           >
             Users
+          </button>
+          <button
+            className={`button-type ${dataType === 'comments' ? 'active' : ''}`}
+            onClick={() => onSetDataType('comments')}
+            type="button"
+          >
+            Comments
           </button>
         </div>
         <h2>Active dataType: {dataType} </h2>
@@ -75,8 +94,11 @@ const Modal = ({ visibleData, onCloseModal }) => {
 };
 
 Modal.propTypes = {
-  visibleData: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
-    .isRequired,
+  visibleData: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+    PropTypes.array,
+  ]).isRequired,
   onCloseModal: PropTypes.func.isRequired,
 };
 

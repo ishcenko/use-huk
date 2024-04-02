@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import Modal from './Modal/Modal';
 import { fetchDetails, fetchPosts } from 'services/api';
 import { ThreeCircles } from 'react-loader-spinner';
@@ -15,115 +15,102 @@ const toastConfig = {
   theme: 'dark',
 };
 
-export class App extends Component {
-  state = {
-    modal: {
+const App = () => {
+  const [modal, setModal] = useState({ isOpen: false, visibleData: null });
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null);
+
+  const onOpenModal = data => {
+    setModal({
+      isOpen: true,
+      visibleData: data,
+    });
+  };
+
+  const onCloseModal = () => {
+    setModal({
       isOpen: false,
       visibleData: null,
-    },
-    posts: [],
-    isLoading: false,
-    error: null,
-    selectedPostId: null,
-  };
-
-  onOpenModal = data => {
-    this.setState({
-      modal: {
-        isOpen: true,
-        visibleData: data,
-      },
     });
   };
 
-  onCloseModal = () => {
-    this.setState({
-      modal: {
-        isOpen: false,
-        visibleData: null,
-      },
-    });
+  const onSelectPostId = postId => {
+    setSelectedPostId(postId);
   };
 
-  onSelectPostId = postId => {
-    this.setState({ selectedPostId: postId });
-  };
-
-  async componentDidMount() {
-    try {
-      this.setState({ isLoading: true });
-      const posts = await fetchPosts();
-
-      this.setState({ posts });
-      toast.success('Your posts were successfully fetched!', toastConfig);
-    } catch (error) {
-      this.setState({ error: error.message });
-      toast.error(error.message, toastConfig);
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
-
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.modal.isOpen !== this.state.modal.isOpen) {
-      console.log('OPEN or CLOSED modal');
-    }
-
-    if (prevState.selectedPostId !== this.state.selectedPostId) {
+  useEffect(() => {
+    const fetchPostData = async () => {
       try {
-        this.setState({ isLoading: true });
-        const postDetails = await fetchDetails(this.state.selectedPostId);
-        this.setState({ modal: { isOpen: true, visibleData: postDetails } });
-        toast.success('Post details were successfully fetched!', toastConfig);
-
-        console.log('postDetails', postDetails);
+        setIsLoading(true);
+        const posts = await fetchPosts();
+        setPosts(posts);
+        toast.success('Your posts were successfully fetched!', toastConfig);
       } catch (error) {
-        this.setState({ error: error.message });
+        setError(error.message);
         toast.error(error.message, toastConfig);
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
-    }
-  }
+    };
+    fetchPostData();
+  }, []);
 
-  render() {
-    return (
-      <div>
-        <h1 className="title-app">React</h1>
-        {this.state.modal.isOpen && (
-          <Modal
-            onCloseModal={this.onCloseModal}
-            visibleData={this.state.modal.visibleData}
-          />
-        )}
-        {this.state.error !== null && <p className="c-error"> Oops, error.</p>}
-        {this.state.isLoading && (
-          <ThreeCircles
-            visible={true}
-            height="100"
-            width="100"
-            color="#04e4f9"
-            ariaLabel="three-circles-loading"
-            wrapperStyle={{}}
-            wrapperClass=""
-          />
-        )}
+  useEffect(() => {
+    if (selectedPostId === null) return;
 
-        {this.state.posts.length > 0 &&
-          this.state.posts.map(post => {
-            return (
-              <button
-                onClick={() => this.onSelectPostId(post.id)}
-                className="post"
-                key={post.id}
-              >
-                <strong className="post-id">Id: {post.id}</strong>
-                <h4 className="post-title"> {post.title} </h4>
-                <p className="post-body">{post.body}</p>
-              </button>
-            );
-          })}
-      </div>
-    );
-  }
-}
+    const fetchPostData = async postId => {
+      try {
+        setIsLoading(true);
+        const postDetails = await fetchDetails(postId);
+        onOpenModal(postDetails);
+        toast.success('Post details were successfully fetched!', toastConfig);
+      } catch (error) {
+        setError(error.message);
+        toast.error(error.message, toastConfig);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPostData(selectedPostId);
+  }, [selectedPostId]);
+
+  return (
+    <div>
+      <h1 className="title-app">React</h1>
+      {modal.isOpen && (
+        <Modal onCloseModal={onCloseModal} visibleData={modal.visibleData} />
+      )}
+      {error !== null && <p className="c-error"> Oops, error.</p>}
+      {isLoading && (
+        <ThreeCircles
+          visible={true}
+          height="100"
+          width="100"
+          color="#04e4f9"
+          ariaLabel="three-circles-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
+      )}
+
+      {posts.length > 0 &&
+        posts.map(post => {
+          return (
+            <button
+              onClick={() => onSelectPostId(post.id)}
+              className="post"
+              key={post.id}
+            >
+              <strong className="post-id">Id: {post.id}</strong>
+              <h4 className="post-title"> {post.title} </h4>
+              <p className="post-body">{post.body}</p>
+            </button>
+          );
+        })}
+    </div>
+  );
+};
+
+export default App;

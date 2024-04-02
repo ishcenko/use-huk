@@ -7,8 +7,12 @@ export const StyledOverlay = styled.div`
   top: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.7);
-  .buttonType {
-    margin-top: 35px;
+  .button-type.active {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+  }
+  .button-type {
+    /* margin-top: 35px; */
     width: 300px;
     margin-right: auto;
     margin-left: auto;
@@ -16,18 +20,22 @@ export const StyledOverlay = styled.div`
     flex-direction: row;
     justify-content: space-between;
   }
-  .buttonType.active {
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #fff;
-  }
+
   .button-type {
+    display: block;
     border: 2px solid black;
-    border-radius: 4px;
-    background-color: aquamarine;
+    border-radius: 8px;
+    background-color: beige;
     color: #000;
     width: 120px;
+    text-align: center;
     padding-top: 8px;
     padding-bottom: 8px;
+  }
+
+  .buttonType {
+    display: flex;
+    margin: 16px;
   }
 `;
 
